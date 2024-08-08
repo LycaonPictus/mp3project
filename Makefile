@@ -1,7 +1,7 @@
 COMPILER = gcc
 NAME = mp3p
 FLAGS = -Wall -Wextra -Werror
-INCLUDES = -lreadline
+INCLUDES = -lreadline -I include
 
 SRC_FOLDER = src/linux
 SRC_FILES = main.c parsing.c

@@ -1,6 +1,6 @@
-#include "mp3project.h"
+#include <mp3project.h>
 
-void	addline(char **lineptr)
+static void	addline(char **lineptr)
 {
 	unsigned int	len1;
 	unsigned int	len2;
@@ -57,7 +57,7 @@ void	check_line(char **lineptr)
 	}
 }
 
-void	get_argc(char *line, int *argcptr)
+static void	get_argc(char *line, int *argcptr)
 {
 	int		argc;
 	char	quote;
@@ -88,7 +88,7 @@ void	get_argc(char *line, int *argcptr)
 	*argcptr = argc;
 }
 
-unsigned int	arg_len(char *str)
+static unsigned int	arg_len(char *str)
 {
 	unsigned int	len;
 	int				esc;
@@ -117,7 +117,7 @@ unsigned int	arg_len(char *str)
 	return (len);
 }
 
-char	*get_arg(char **strptr)
+static char	*get_arg(char **strptr)
 {
 	unsigned int	i;
 	unsigned int	j;

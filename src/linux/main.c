@@ -1,4 +1,4 @@
-#include "mp3project.h"
+#include <mp3project.h>
 
 int	execute_cmd(int argc, char **argv)
 {
@@ -40,6 +40,7 @@ int	enter_program()
 			{
 				free(line);
 				free_array(argv);
+				rl_clear_history();
 				return (0);
 			}
 			execute_cmd(argc, argv);
