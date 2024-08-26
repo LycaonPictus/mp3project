@@ -1,12 +1,13 @@
 #include <mp3project.h>
+#define BUFFER_SIZE 1024
 
 int	execute_cmd(int argc, char **argv)
 {
 	if (argc > 0)
 	{
-		write(1, "Executing ", 10);
+		write(1, "Executing \"", 11);
 		write(1, argv[0], strlen(argv[0]));
-		write(1, "...\n", 4);
+		write(1, "\"...\n", 5);
 	}
 	return (0);
 }
@@ -21,7 +22,20 @@ void	free_array(char **array)
 	free(array);
 }
 
-int	enter_program()
+char	*my_readline(char *prompt)
+{
+	//char	*line;
+	char	buffer[BUFFER_SIZE];
+	int		bytes_read;
+
+	write(1, prompt, strlen(prompt));
+	bytes_read = read(0, buffer, BUFFER_SIZE);
+	buffer[bytes_read] = '\0';
+	printf("%i\n", bytes_read);
+	return (strdup(buffer));
+}
+
+int	enter_shell()
 {
 	char	*line;
 	int		argc;
@@ -30,7 +44,7 @@ int	enter_program()
 	line = NULL;
 	while (1)
 	{
-		line = readline("> ");
+		line = my_readline("> ");
 		if (*line)
 		{
 			check_line(&line);
@@ -54,11 +68,7 @@ int	enter_program()
 int main(int argc, char **argv)
 {
     if (argc == 1)
-    {
-        return (enter_program());
-    }
+        return (enter_shell());
 	else
-	{
 		return (execute_cmd(argc - 1, &argv[1]));
-	}
 }
