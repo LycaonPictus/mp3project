@@ -2,58 +2,13 @@
 #include <string.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <mp3file.h>
+#include <ctype.h>
 #define BUFFER_SIZE 1024
 #include <stdio.h>
-int	read_tag_v3(int fd, int size)
-{
-	int		bytes_read;
-	char	*buffer;
+int	read_tag(int fd);
 
-	buffer = malloc(size + 1);
-	buffer[size] = '\0';
-	bytes_read = read(fd, buffer, size);
-	printf("%i bytes read.\n", bytes_read);
-	free(buffer);
-}
 
-int	get_tag_size(char array[4])
-{
-	int	size;
-	int	i;
-
-	size = 0;
-	i = 0;
-	do
-	{
-		size *= 128;
-		if (array[i] < 0)
-		{
-			write(2, "Tag size error.\n", 16);
-			return (0);
-		}
-		size += array[i];
-	} while (++i < 4);
-	return (size);
-}
-
-int	read_tag(int fd)
-{
-	int		bytes_read;
-	char	buffer[10];
-	int		size = 0;
-	char	flags[2] = {0, 0};
-	int		i;
-
-	bytes_read = read(fd, buffer, 10);
-	if (strncmp(buffer, "ID3", 3))
-		write(2, "No tag found.\n", 14);
-	size = get_tag_size(&buffer[6]);
-	printf("Size is: %i\n", size);
-	if (buffer[3] == 3 && buffer[4] == 0)
-		read_tag_v3(fd, size);
-	else
-		write(1, "This is not an ID3v2.3 tag\n", 27);
-}
 
 int	read_fd(int fd)
 {
@@ -63,6 +18,7 @@ int	read_fd(int fd)
 
 	bytes_read = 0;
 	read_tag(fd);
+	write(1, "Reading audio section...\n", 25);
 	do
 	{
 		if (0)
