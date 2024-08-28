@@ -18,6 +18,8 @@ void	extract_tag(int fd_mp3, int fd_tag)
 	char		header[10];
 	u_int32_t	size;
 	int			bytes_read;
+	int			fd_mp3;
+	int			fd_tag;
 
 	bytes_read = read(fd_mp3, header, 10);
 	write(fd_tag, header, 10);
