@@ -93,4 +93,6 @@ typedef struct s_mp3frame
 	struct s_mp3frame	*next;
 }	t_mp3frame;
 
+int	read_frames_v3(int fd, u_int32_t size);
+
 #endif

@@ -6,9 +6,6 @@
 #include <ctype.h>
 #define BUFFER_SIZE 1024
 #include <stdio.h>
-int	read_tag(int fd);
-
-
 
 int	read_fd(int fd)
 {

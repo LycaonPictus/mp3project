@@ -26,7 +26,7 @@ u_int32_t	get_frame_size(char array[4])
 	return (size);
 }
 
-t_mp3frame	*get_frame(int fd, int *rem)
+t_mp3frame	*get_frame(int fd, u_int32_t *rem)
 {
 	int			bytes_read;
 	t_mp3frame	*frame;
@@ -65,8 +65,13 @@ t_mp3frame	*get_frame(int fd, int *rem)
 	}
 	content = malloc(frame->size + 1);
 	content[frame->size] = '\0';
-	read(fd, content, frame->size);
+	bytes_read = read(fd, content, frame->size);
 	*rem -= frame->size;
+	if (bytes_read == -1)
+	{
+		write(1, "Read error.\n", 12);
+		return (NULL);
+	}
 	write(1, header, 4);
 	write(1, ": ", 2);
 	if (strncmp(header, "APIC", 4))
@@ -78,13 +83,15 @@ t_mp3frame	*get_frame(int fd, int *rem)
 	return (frame);
 }
 
-int	read_frames_v3(int fd, int size)
+int	read_frames_v3(int fd, u_int32_t size)
 {
 	t_mp3frame	*res;
-	res = (t_mp3frame *)0x1;
-	while (size && res)
+
+	do
 	{
 		res = get_frame(fd, &size);
 		free(res);
 	}
+	while (size && res);
+	return (0);
 }

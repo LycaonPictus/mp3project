@@ -11,4 +11,6 @@ typedef struct s_mp3tag
 
 }	t_mp3tag;
 
+int	read_tag(int fd);
+
 #endif
