@@ -9,12 +9,14 @@
 
 int	read_fd(int fd)
 {
-	int		bytes_read;
-	int		total = 0;
-	char	buffer[BUFFER_SIZE];
+	int			bytes_read;
+	int			total = 0;
+	char		buffer[BUFFER_SIZE];
+	t_mp3tag	*tag;
 
 	bytes_read = 0;
-	read_tag(fd);
+	tag = get_tag(fd);
+	free(tag);
 	write(1, "Reading audio section...\n", 25);
 	do
 	{

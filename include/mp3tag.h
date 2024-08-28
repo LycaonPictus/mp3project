@@ -6,11 +6,12 @@ typedef struct s_mp3tag
 {
 	char		version[2];
 	char		flags;
-	int			size;
+	u_int32_t	size;
 	t_mp3frame	*frames;
 
 }	t_mp3tag;
 
-int	read_tag(int fd);
+t_mp3tag	*get_tag(int fd);
+u_int32_t	get_tag_size(char tag_header[4]);
 
 #endif

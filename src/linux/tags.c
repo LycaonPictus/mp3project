@@ -1,9 +1,9 @@
 #include <mp3tag.h>
 
-static int	get_tag_size(char tag_header[4])
+u_int32_t	get_tag_size(char tag_header[4])
 {
-	int	size;
-	int	i;
+	u_int32_t	size;
+	int			i;
 
 	size = 0;
 	i = 0;
@@ -20,7 +20,7 @@ static int	get_tag_size(char tag_header[4])
 	return (size);
 }
 
-int	read_tag(int fd)
+t_mp3tag	*get_tag(int fd)
 {
 	int			bytes_read;
 	char		buffer[10];
@@ -30,12 +30,12 @@ int	read_tag(int fd)
 	if (bytes_read == -1)
 	{
 		write(2, "Read error.\n", 12);
-		return (1);
+		return (NULL);
 	}
 	if (strncmp(buffer, "ID3", (size_t) 3))
 	{
 		write(2, "No tag found.\n", 14);
-		return (1);
+		return (NULL);
 	}
 	tag = malloc(sizeof(t_mp3tag));
 	tag->version[0] = buffer[3];
@@ -47,6 +47,5 @@ int	read_tag(int fd)
 		read_frames_v3(fd, tag->size);
 	else
 		write(1, "This is not an ID3v2.3.0 tag\n", 29);
-	free(tag);
-	return (0);
+	return (tag);
 }
