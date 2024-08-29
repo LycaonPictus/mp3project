@@ -2,7 +2,7 @@
 #include <mp3tag.h>
 #include <fcntl.h>
 
-static int	extract_tag_header(int fd_mp3, int fd_tag, char header[10])
+static int	read_header(int fd_mp3, char header[10])
 {
 	int			bytes_read;
 
@@ -12,34 +12,31 @@ static int	extract_tag_header(int fd_mp3, int fd_tag, char header[10])
 		write(2, "Error. Cannot read tag header.\n", 31);
 		return (1);
 	}
-	write(fd_tag, header, bytes_read);
 	return (0);
 }
 
-static int	extract_tag_body(int fd_mp3, int fd_tag, char header[10])
+static int	read_body(int fd_mp3, char header[10], char **body)
 {
-	char		*body;
 	u_int32_t	size;
 	int			bytes_read;
 
 	size = get_tag_size(&header[6]);
-	body = malloc(size);
-	bytes_read = read(fd_mp3, body, size);
-	if (bytes_read == -1)
+	*body = malloc(size);
+	bytes_read = read(fd_mp3, *body, size);
+	if (bytes_read < size)
 	{
-		write (2, "Error. Cannot read file.\n", 25);
+		write (2, "Error. Cannot read tag.\n", 24);
 		return (1);
 	}
-	write(fd_tag, body, bytes_read);
-	free(body);
 	return (0);
 }
 
 int	extract_tag(char *file_mp3, char *file_tag)
 {
-	char		header[10];
-	int			fd_mp3;
-	int			fd_tag;
+	char	header[10];
+	int		fd_mp3;
+	int		fd_tag;
+	char	*body;
 
 	fd_mp3 = open(file_mp3, O_RDONLY);
 	if (fd_mp3 == -1)
@@ -60,16 +57,20 @@ int	extract_tag(char *file_mp3, char *file_tag)
 		close(fd_mp3);
 		return (1);
 	}
-	if (extract_tag_header(fd_mp3, fd_tag, header))
+	if (read_header(fd_mp3, header))
 		return (1);
-	if (extract_tag_body(fd_mp3, fd_tag, header))
+	body = NULL;
+	if (read_body(fd_mp3, header, &body))
 		return (1);
 	close(fd_mp3);
+	write (fd_tag, header, 10);
+	write (fd_tag, body, get_tag_size(&header[6]));
+	free(body);
 	close(fd_tag);
 	return (0);
 }
 
-int main()
+int	main(void)
 {
 	extract_tag("example/Ed Sheeran - Thinking out loud.mp3", "example/Ed Sheeran - Thinking out loud.tag");
 	return (0);

@@ -12,6 +12,6 @@ typedef struct s_mp3tag
 }	t_mp3tag;
 
 t_mp3tag	*get_tag(int fd);
-u_int32_t	get_tag_size(char tag_header[4]);
+u_int32_t	get_tag_size(char tag_header[10]);
 
 #endif
