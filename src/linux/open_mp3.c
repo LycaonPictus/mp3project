@@ -2,7 +2,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include <mp3file.h>
+#include <id3tagged_file.h>
 #include <ctype.h>
 #define BUFFER_SIZE 1024
 #include <stdio.h>
@@ -12,7 +12,7 @@ int	read_fd(int fd)
 	int			bytes_read;
 	int			total = 0;
 	char		buffer[BUFFER_SIZE];
-	t_mp3tag	*tag;
+	t_id3tag	*tag;
 
 	bytes_read = 0;
 	tag = get_tag(fd);

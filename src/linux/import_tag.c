@@ -1,4 +1,4 @@
-#include <mp3tag.h>
+#include <id3tag.h>
 
 static int	check_errors(int argc, char **argv)
 {

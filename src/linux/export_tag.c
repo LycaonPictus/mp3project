@@ -1,10 +1,10 @@
 #include <unistd.h>
-#include <mp3tag.h>
+#include <id3tag.h>
 #include <fcntl.h>
 
 static int	read_header(int fd_mp3, char header[10])
 {
-	int			bytes_read;
+	int	bytes_read;
 
 	bytes_read = read(fd_mp3, header, 10);
 	if (bytes_read < 10)

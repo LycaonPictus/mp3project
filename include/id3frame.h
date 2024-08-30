@@ -1,5 +1,5 @@
-#ifndef _MP3FRAME_H
-#define _MP3FRAME_H
+#ifndef _ID3FRAME_H
+#define _ID3FRAME_H
 # include <stdlib.h>
 # include <ctype.h>
 # include <unistd.h>
@@ -84,15 +84,17 @@ typedef enum e_frameID
 	WXXX
 }	t_frameID;
 
-typedef struct s_mp3frame
+typedef struct s_id3frame
 {
-	t_frameID			frameID;
+	char				*frameID;
 	u_int32_t			size;
 	u_char				flags[2];
-	void				*content;
-	struct s_mp3frame	*next;
-}	t_mp3frame;
+	char				*content;
+	struct s_id3frame	*next;
+}	t_id3frame;
 
-int	read_frames_v3(int fd, u_int32_t size);
+t_id3frame	*read_frames_v3(int fd, u_int32_t size);
+void		free_frame(t_id3frame **ptr);
+void		free_frames(t_id3frame **ptr);
 
 #endif
