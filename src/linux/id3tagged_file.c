@@ -32,6 +32,7 @@ void	free_tagged_file(t_id3tagged_file **ptr)
 	tf = *ptr;
 	if (!tf)
 		return ;
+	close(tf->fd);
 	free_tag(&tf->tag);
 	free(tf->name);
 	tf->name = NULL;
@@ -64,17 +65,4 @@ void	write_rem(t_id3tagged_file *tf, int fd_out)
 			break ;
 		}
 	} while (bytes_read);
-}
-#include <stdio.h>
-int	main(int argc, char **argv)
-{
-	t_id3tagged_file	*tf;
-
-	if (argc != 2)
-		return (1);
-	tf = get_tagged_file(argv[1]);
-	if (!tf)
-		return (1);
-	free_tagged_file(&tf);
-	return (0);
 }

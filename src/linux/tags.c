@@ -56,7 +56,7 @@ void	free_tag(t_id3tag **ptr)
 	tag = *ptr;
 	if (!tag)
 		return ;
-	free_frames(&tag->frames);
+	free_framelist(&tag->frames);
 	free(tag);
 	*ptr = NULL;
 }
@@ -84,7 +84,7 @@ void	write_tag(t_id3tag *tag, int fd)
 	write_tag_size(tag, fd);
 	while (tag->frames)
 	{
-		write(fd, tag->frames->frameID, strlen(tag->frames->frameID));
+		write(fd, tag->frames->frame->frameID, strlen(tag->frames->frame->frameID));
 		tag->frames = tag->frames->next;
 	}
 }

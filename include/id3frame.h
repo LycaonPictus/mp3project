@@ -86,15 +86,20 @@ typedef enum e_frameID
 
 typedef struct s_id3frame
 {
-	char				*frameID;
+	char				frameID[4];
 	u_int32_t			size;
 	u_char				flags[2];
 	char				*content;
-	struct s_id3frame	*next;
 }	t_id3frame;
 
-t_id3frame	*read_frames_v3(int fd, u_int32_t size);
-void		free_frame(t_id3frame **ptr);
-void		free_frames(t_id3frame **ptr);
+typedef struct s_id3framelist
+{
+	t_id3frame				*frame;
+	struct s_id3framelist	*next;
+}	t_id3framelist;
+
+t_id3framelist	*read_frames_v3(int fd, u_int32_t size);
+void			free_frame(t_id3frame **ptr);
+void			free_framelist(t_id3framelist **ptr);
 
 #endif

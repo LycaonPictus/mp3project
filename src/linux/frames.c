@@ -26,6 +26,24 @@ u_int32_t	get_frame_size(char array[4])
 	return (size);
 }
 
+t_id3frame	*new_frame(void)
+{
+	t_id3frame	*frame;
+
+	frame = malloc(sizeof(t_id3frame));
+	if (!frame)
+		return (NULL);
+	frame->content = NULL;
+	frame->size = 0;
+	frame->flags[0] = 0;
+	frame->flags[1] = 0;
+	frame->frameID[0] = 0;
+	frame->frameID[1] = 0;
+	frame->frameID[2] = 0;
+	frame->frameID[3] = 0;
+	return (frame);
+}
+
 t_id3frame	*get_frame(int fd, u_int32_t *rem)
 {
 	int			bytes_read;
@@ -49,7 +67,10 @@ t_id3frame	*get_frame(int fd, u_int32_t *rem)
 		free(content);
 		return (NULL);
 	}
-	frame = malloc(sizeof(t_id3frame));
+	frame = new_frame();
+	if (!frame)
+		return (NULL);
+	memcpy(frame->frameID, header, 4);
 	frame->size = get_frame_size(&header[4]);
 	frame->flags[0] = header[8];
 	frame->flags[1] = header[9];
@@ -61,6 +82,7 @@ t_id3frame	*get_frame(int fd, u_int32_t *rem)
 		read(fd, content, *rem);
 		free(content);
 		*rem = 0;
+		free_frame(&frame);
 		return (NULL);
 	}
 	frame->content = malloc(frame->size);
@@ -68,7 +90,8 @@ t_id3frame	*get_frame(int fd, u_int32_t *rem)
 	*rem -= frame->size;
 	if (bytes_read == -1)
 	{
-		write(1, "Read error.\n", 12);
+		write(2, "Read error.\n", 12);
+		free_frame(&frame);
 		return (NULL);
 	}
 	write(1, header, 4);
@@ -81,25 +104,38 @@ t_id3frame	*get_frame(int fd, u_int32_t *rem)
 	return (frame);
 }
 
-t_id3frame	*read_frames_v3(int fd, u_int32_t size)
+t_id3framelist	*read_frames_v3(int fd, u_int32_t size)
 {
-	t_id3frame	*res;
-	t_id3frame	*list;
-	t_id3frame	*last;
+	t_id3frame		*frame;
+	t_id3framelist	*list;
+	t_id3framelist	*last;
+	t_id3framelist	*new;
 
+	list = NULL;
 	last = NULL;
 	do
 	{
-		res = get_frame(fd, &size);
+		frame = get_frame(fd, &size);
+		if (!frame)
+			break ;
+		new = malloc(sizeof(t_id3framelist));
+		new->next = NULL;
+		if (!new)
+		{
+			free_frame(&frame);
+			free_framelist(&list);
+			return (NULL);
+		}
+		new->frame = frame;
 		if (!last)
 		{
-			list = res;
-			last = list;
+			list = new;
+			last = new;
 		}
 		else
 		{
-			last->next = res;
-			last = res;
+			last->next = new;
+			last = new;
 		}
 	}
 	while (size);
@@ -118,40 +154,42 @@ void	free_frame(t_id3frame **ptr)
 	*ptr = NULL;
 }
 
-void	free_frames(t_id3frame **ptr)
+void	free_framelist(t_id3framelist **ptr)
 {
-	t_id3frame *frame;
-	t_id3frame *next;
+	t_id3framelist *node;
+	t_id3framelist *next;
 
-	frame = *ptr;
-	while (frame)
+	node = *ptr;
+	while (node)
 	{
-		next = frame->next;
-		free_frame(&frame);
-		frame = next;
+		next = node->next;
+		free_frame(&node->frame);
+		free(node);
+		node = next;
 	}
 }
 
-void	del_frame(t_id3frame **ptr, unsigned int index)
+void	del_frame(t_id3framelist **ptr, unsigned int index)
 {
-	t_id3frame		*frame;
+	t_id3framelist	*node;
 	unsigned int	cur_index;
-	t_id3frame		*prev;
+	t_id3framelist	*prev;
 
 	cur_index = 0;
 	prev = NULL;
-	frame = *ptr;
-	while (frame && cur_index < index)
+	node = *ptr;
+	while (node && cur_index < index)
 	{
-		prev = frame;
-		frame = frame->next;
+		prev = node;
+		node = node->next;
 		cur_index++;
 	}
-	if (!frame)
+	if (!node)
 		return ;
 	if (prev)
-		prev->next = frame->next;
+		prev->next = node->next;
 	else
-		*ptr = frame->next;
-	free_frame(&frame);
+		*ptr = node->next;
+	free_frame(&node->frame);
+	free(node);
 }

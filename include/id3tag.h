@@ -4,10 +4,10 @@
 
 typedef struct s_id3tag
 {
-	char		version[2];
-	char		flags;
-	u_int32_t	size;
-	t_id3frame	*frames;
+	char			version[2];
+	u_char			flags;
+	u_int32_t		size;
+	t_id3framelist	*frames;
 
 }	t_id3tag;
 
