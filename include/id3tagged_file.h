@@ -11,6 +11,7 @@ typedef struct s_id3tagged_file
 	t_id3tag	*tag;
 	char		*name;
 	int			fd;
+	char		*content;
 }	t_id3tagged_file;
 
 t_id3tagged_file	*get_tagged_file(char *file_name);

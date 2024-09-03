@@ -98,8 +98,9 @@ typedef struct s_id3framelist
 	struct s_id3framelist	*next;
 }	t_id3framelist;
 
-t_id3framelist	*read_frames_v3(int fd, u_int32_t size);
+t_id3framelist	*read_frames_v3(int fd, u_int32_t size, u_int32_t *padding);
 void			free_frame(t_id3frame **ptr);
 void			free_framelist(t_id3framelist **ptr);
+int				write_frame(t_id3frame *frame, int fd);
 
 #endif

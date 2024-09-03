@@ -11,19 +11,41 @@ int	is_frame_id(char id[4])
 	return (1);
 }
 
+int	is_padding(char *buffer, int bytes_read)
+{
+	int	i;
+
+	if (bytes_read == -1)
+		return (0);
+	for (i = 0; i < bytes_read; i++)
+		if (buffer[i] != '\0')
+			return (0);
+	return (1);
+}
+
 u_int32_t	get_frame_size(char array[4])
 {
 	u_int32_t	size;
 	int	i;
 
 	size = 0;
-	i = 0;
-	do
+	for (i = 0; i < 4; i++)
 	{
 		size *= 256;
 		size += (unsigned char)array[i];
-	} while (++i < 4);
+	}
 	return (size);
+}
+
+void	encode_frame_size(u_int32_t size, char array[4])
+{
+	int			i;
+
+	for (i = 3; i >= 0; i--)
+	{
+		array[i] = size % 256;
+		size /= 256;
+	}
 }
 
 t_id3frame	*new_frame(void)
@@ -44,7 +66,7 @@ t_id3frame	*new_frame(void)
 	return (frame);
 }
 
-t_id3frame	*get_frame(int fd, u_int32_t *rem)
+t_id3frame	*get_frame(int fd, u_int32_t *rem, u_int32_t *padding)
 {
 	int			bytes_read;
 	t_id3frame	*frame;
@@ -54,6 +76,8 @@ t_id3frame	*get_frame(int fd, u_int32_t *rem)
 	if (*rem < 10)
 	{
 		bytes_read = read(fd, header, *rem);
+		if (is_padding(header, bytes_read))
+			*padding = *rem;
 		*rem = 0;
 		return (NULL);
 	}
@@ -61,6 +85,8 @@ t_id3frame	*get_frame(int fd, u_int32_t *rem)
 	*rem -= 10;
 	if (!is_frame_id(header))
 	{
+		if (is_padding(header, bytes_read))
+			*padding = *rem + 10;
 		content = malloc(*rem);
 		bytes_read = read(fd, content, *rem);
 		*rem = 0;
@@ -94,17 +120,10 @@ t_id3frame	*get_frame(int fd, u_int32_t *rem)
 		free_frame(&frame);
 		return (NULL);
 	}
-	write(1, header, 4);
-	write(1, ": ", 2);
-	if (strncmp(header, "APIC", 4))
-		write(1, frame->content, frame->size);
-	else
-		write(1, "(binary)", 8);
-	write(1, "\n", 1);
 	return (frame);
 }
 
-t_id3framelist	*read_frames_v3(int fd, u_int32_t size)
+t_id3framelist	*read_frames_v3(int fd, u_int32_t size, u_int32_t *padding)
 {
 	t_id3frame		*frame;
 	t_id3framelist	*list;
@@ -115,7 +134,7 @@ t_id3framelist	*read_frames_v3(int fd, u_int32_t size)
 	last = NULL;
 	do
 	{
-		frame = get_frame(fd, &size);
+		frame = get_frame(fd, &size, padding);
 		if (!frame)
 			break ;
 		new = malloc(sizeof(t_id3framelist));
@@ -192,4 +211,33 @@ void	del_frame(t_id3framelist **ptr, unsigned int index)
 		*ptr = node->next;
 	free_frame(&node->frame);
 	free(node);
+}
+
+int	write_frame(t_id3frame *frame, int fd)
+{
+	int		bytes_written;
+	int		total_bytes;
+	char	header[10];
+
+	if (!frame)
+		return (-1);
+	memcpy(header, frame->frameID, 4);
+	encode_frame_size(frame->size, &header[4]);
+	header[8] = frame->flags[0];
+	header[9] = frame->flags[1];
+	bytes_written = write(fd, header, 10);
+	total_bytes = bytes_written;
+	if (bytes_written < 10)
+	{
+		write(2, "Cannot write in given file descriptor.\n", 39);
+		return (total_bytes);
+	}
+	bytes_written = write(fd, frame->content, frame->size);
+	if (bytes_written == -1)
+	{
+		write(2, "Cannot write in given file descriptor.\n", 39);
+		return (total_bytes);
+	}
+	total_bytes += bytes_written;
+	return (total_bytes);
 }

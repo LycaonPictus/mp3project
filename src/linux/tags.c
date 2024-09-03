@@ -38,12 +38,13 @@ t_id3tag	*get_tag(int fd)
 		return (NULL);
 	}
 	tag = malloc(sizeof(t_id3tag));
+	tag->padding_size = 0;
 	tag->version[0] = header[3];
 	tag->version[1] = header[4];
 	tag->flags = header[5];
 	tag->size = get_tag_size(header);
 	if (tag->version[0] == 3 && tag->version[1] == 0)
-		tag->frames = read_frames_v3(fd, tag->size);
+		tag->frames = read_frames_v3(fd, tag->size, &tag->padding_size);
 	else
 		write(1, "This is not an ID3v2.3.0 tag\n", 29);
 	return (tag);
@@ -78,13 +79,30 @@ void	write_tag_size(t_id3tag *tag, int fd)
 
 void	write_tag(t_id3tag *tag, int fd)
 {
+	t_id3framelist	*fl;
+	u_int32_t		padding;
+	int				bytes_read;
+
 	write(fd, "ID3", 3);
 	write(fd, tag->version, 2);
 	write(fd, &tag->flags, 1);
 	write_tag_size(tag, fd);
-	while (tag->frames)
+	fl = tag->frames;
+	while (fl)
 	{
-		write(fd, tag->frames->frame->frameID, strlen(tag->frames->frame->frameID));
-		tag->frames = tag->frames->next;
+		bytes_read = write_frame(fl->frame, fd);
+		if (bytes_read == -1)
+			return ;
+		fl = fl->next;
+	}
+	padding = tag->padding_size;
+	while (padding)
+	{
+		if (write(fd, "\0", 1) == -1)
+		{
+			write(2, "Error writing tag padding.\n", 27);
+			return ;
+		}
+		padding--;
 	}
 }
