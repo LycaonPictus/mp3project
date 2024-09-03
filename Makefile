@@ -10,6 +10,10 @@ SRC = $(addprefix $(SRC_FOLDER)/, $(SRC_FILES))
 $(NAME): $(SRC)
 	@$(COMPILER) $(FLAGS) -o $(NAME) $(SRC) $(INCLUDES)
 
+# BINARY FILES #
+
+
+
 all: $(NAME)
 
 clean:
