@@ -215,9 +215,9 @@ void	del_frame(t_id3framelist **ptr, unsigned int index)
 
 int	write_frame(t_id3frame *frame, int fd)
 {
-	int		bytes_written;
-	int		total_bytes;
-	char	header[10];
+	int			bytes_written;
+	int			total_bytes;
+	char		header[10];
 
 	if (!frame)
 		return (-1);

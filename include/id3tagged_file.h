@@ -10,12 +10,11 @@ typedef struct s_id3tagged_file
 {
 	t_id3tag	*tag;
 	char		*name;
-	char		*content;
-	u_int32_t	content_size;
+	int			fd;
 }	t_id3tagged_file;
 
 t_id3tagged_file	*get_tagged_file(char *file_name);
 void				free_tagged_file(t_id3tagged_file **ptr);
-void				write_rem(t_id3tagged_file *tf, int fd_out);
-
+int					write_rem(t_id3tagged_file *tf, int fd_out);
+int					write_file(t_id3tagged_file *tf, int fd);
 #endif

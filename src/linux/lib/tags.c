@@ -19,7 +19,7 @@ u_int32_t	get_tag_size(char tag_header[10])
 	} while (++i < 10);
 	return (size);
 }
-
+#include <stdio.h>
 t_id3tag	*get_tag(int fd)
 {
 	int			bytes_read;
@@ -32,7 +32,7 @@ t_id3tag	*get_tag(int fd)
 		write(2, "Read error.\n", 12);
 		return (NULL);
 	}
-	if (strncmp(header, "ID3", (size_t) 3))
+	if (strncmp(header, "ID3", 3))
 	{
 		write(2, "No tag found.\n", 14);
 		return (NULL);
@@ -77,7 +77,7 @@ void	write_tag_size(t_id3tag *tag, int fd)
 	write (fd, buffer, 4);
 }
 
-void	write_tag(t_id3tag *tag, int fd)
+int	write_tag(t_id3tag *tag, int fd)
 {
 	t_id3framelist	*fl;
 	u_int32_t		padding;
@@ -92,7 +92,7 @@ void	write_tag(t_id3tag *tag, int fd)
 	{
 		bytes_read = write_frame(fl->frame, fd);
 		if (bytes_read == -1)
-			return ;
+			return (1);
 		fl = fl->next;
 	}
 	padding = tag->padding_size;
@@ -101,8 +101,9 @@ void	write_tag(t_id3tag *tag, int fd)
 		if (write(fd, "\0", 1) == -1)
 		{
 			write(2, "Error writing tag padding.\n", 27);
-			return ;
+			return (1);
 		}
 		padding--;
 	}
+	return (0);
 }
