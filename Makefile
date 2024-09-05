@@ -32,16 +32,17 @@ all: $(NAME)
 $(NAME): $(PRG_FOLDER)/main.o $(id3tagged_file) $(tags) $(frames) $(parsing)
 	$(COMPILER) $(FLAGS) -Iinclude -o $(NAME) $^ -lreadline
 
-clear_padding: $(PRG_FOLDER)/clear_padding.o $(id3tagged_file) $(tags) $(frames)
-	$(COMPILER) $(FLAGS) -Iinclude -o $@ $^ -lreadline
+bin/clear_padding: $(PRG_FOLDER)/clear_padding.o $(id3tagged_file) $(tags) $(frames)
+	mkdir -p bin
+	$(COMPILER) $(FLAGS) -Iinclude -o $@ $^
 
 clean:
 	@rm -rf $(LIB_FOLDER)/*.o $(PRG_FOLDER)/*.o
-	@rm -rf clear_padding
 	@rm -rf .temp
 
 fclean: clean
 	@rm -rf $(NAME)
+	@rm -rf bin
 
 re: fclean all
 
