@@ -1,5 +1,6 @@
 #include <id3tagged_file.h>
 #define TEMP_FILE ".temp"
+#include <sys/wait.h>
 
 static int	temp_writing(char *input)
 {
@@ -68,7 +69,86 @@ static int	out_writing(char *output)
 	return (result);
 }
 
-int	main(int argc, char **argv)
+char	*next_path(char **paths, char *cmd)
+{
+	char	*path;
+	size_t	path_len;
+	size_t	cmd_len;
+	size_t	i;
+
+	if (!**paths)
+		return (NULL);
+	path_len = 0;
+	while (*paths && (*paths)[path_len] != ':' && (*paths)[path_len] != '\0')
+		path_len++;
+	cmd_len = 0;
+	while (cmd && cmd[cmd_len])
+		cmd_len++;
+	path = malloc(path_len + cmd_len + 2);
+	if (!path)
+		return (NULL);
+	i = 0;
+	while (i < path_len)
+	{
+		path[i] = (*paths)[i];
+		i++;
+	}
+	path[path_len++] = '/';
+	i = 0;
+	while (i < cmd_len)
+	{
+		path[path_len + i] = cmd[i];
+		i++;
+	}
+	path[path_len + i] = '\0';
+	*paths += path_len;
+	if (**paths == ':')
+		(*paths)++;
+	return (path);
+}
+
+void	call_rm(char *file, char **env)
+{
+	pid_t	pid;
+	char	*argv[4];
+	char	*path;
+	char	**envcpy;
+
+	envcpy = env;
+	while (*envcpy && memcmp(*envcpy, "PATH=", 5))
+		envcpy++;
+	if (!*envcpy)
+	{
+		write(2, "PATH not found.\n", 17);
+		return ;
+	}
+	(*envcpy) += 5;
+	path = NULL;
+	while (**envcpy)
+	{
+		free(path);
+		path = next_path(envcpy, "rm");
+		if (!path)
+			return ;
+		if (!access(path, F_OK))
+			break;
+	}
+	argv[0] = "rm";
+	argv[1] = "-rf";
+	argv[2] = file;
+	argv[3] = NULL;
+	pid = fork();
+	if (pid)
+	{
+		waitpid(pid, NULL, 0);
+		free(path);
+	}
+	else
+		execve(path, argv, env);
+	
+}
+
+int	main(int argc, char **argv, char **env)
 {
 	char	*out;
 
@@ -85,5 +165,6 @@ int	main(int argc, char **argv)
 		out = argv[1];
 	if (temp_writing(argv[1]) || out_writing(out))
 		return (1);
+	call_rm(TEMP_FILE, env);
 	return (0);
 }
