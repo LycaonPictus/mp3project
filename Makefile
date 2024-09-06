@@ -42,7 +42,6 @@ export_tag: $(PRG_FOLDER)/export_tag.o $(id3tagged_file) $(tags) $(frames)
 
 clean:
 	@rm -rf $(LIB_FOLDER)/*.o $(PRG_FOLDER)/*.o
-	@rm -rf .temp
 
 fclean: clean
 	@rm -rf $(NAME)
