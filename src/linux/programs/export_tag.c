@@ -1,77 +1,60 @@
-#include <unistd.h>
-#include <id3tag.h>
-#include <fcntl.h>
+#include <id3tagged_file.h>
+#include <dirent.h>
 
-static int	read_header(int fd_mp3, char header[10])
+static void	print_usage(char *progname)
 {
-	int	bytes_read;
-
-	bytes_read = read(fd_mp3, header, 10);
-	if (bytes_read < 10)
-	{
-		write(2, "Error. Cannot read tag header.\n", 31);
-		return (1);
-	}
-	return (0);
+	write(2, "usage: ", 8);
+	write(2, progname, strlen(progname));
+	write(2, " input_file [output_file]\n", 27);
+	write(2, "usage: ", 8);
+	write(2, progname, strlen(progname));
+	write(2, " input_folder output_folder\n", 29);
 }
 
-static int	read_body(int fd_mp3, char header[10], char **body)
+int	main(int argc, char **argv)
 {
-	u_int32_t	size;
-	int			bytes_read;
+	t_id3tagged_file	*file;
+	DIR					*dir1;
+	DIR					*dir2;
+	char				*out;
+	int					fd_out;
 
-	size = get_tag_size(&header[6]);
-	*body = malloc(size);
-	bytes_read = read(fd_mp3, *body, size);
-	if (bytes_read < size)
+	if (argc < 2 || argc > 3)
 	{
-		write (2, "Error. Cannot read tag.\n", 24);
+		print_usage(argv[0]);
 		return (1);
 	}
-	return (0);
-}
-
-int	extract_tag(char *file_mp3, char *file_tag)
-{
-	char	header[10];
-	int		fd_mp3;
-	int		fd_tag;
-	char	*body;
-
-	fd_mp3 = open(file_mp3, O_RDONLY);
-	if (fd_mp3 == -1)
+	dir1 = opendir(argv[1]);
+	if (dir1)
 	{
-		write(2, "Error. File not found.\n", 23);
-		return (1);
+		if (argc == 2)
+		{
+			print_usage(argv[0]);
+			closedir(dir1);
+			return (1);
+		}
+		dir2 = opendir(argv[2]);
+		if (!dir2)
+		{
+			print_usage(argv[0]);
+			closedir(dir1);
+			return (1);
+		}
+		write(1, "OK!\n", 4);
 	}
-	if (!access(file_tag, F_OK))
+	else
 	{
-		write(2, "Error. File already exists.\n", 28);
-		close(fd_mp3);
-		return (1);
+		file = get_tagged_file(argv[1]);
+		if (!file)
+			return (1);
+		if (argc == 2)
+			out = "example.tag";
+		else
+			out = argv[2];
+		fd_out = open(out, O_WRONLY | O_CREAT | O_TRUNC, 0666);
+		write_tag(file->tag, fd_out);
+		close(fd_out);
+		free_tagged_file(&file);
 	}
-	fd_tag = open(file_tag, O_WRONLY | O_CREAT, 0666);
-	if (fd_tag == -1)
-	{
-		write(2, "Error. Cannot open file.\n", 25);
-		close(fd_mp3);
-		return (1);
-	}
-	if (read_header(fd_mp3, header))
-		return (1);
-	body = NULL;
-	if (read_body(fd_mp3, header, &body))
-		return (1);
-	close(fd_mp3);
-	write (fd_tag, header, 10);
-	write (fd_tag, body, get_tag_size(&header[6]));
-	free(body);
-	close(fd_tag);
-	return (0);
-}
-
-int	main(void)
-{
-	extract_tag("example/Ed Sheeran - Thinking out loud.mp3", "example/Ed Sheeran - Thinking out loud.tag");
 	return (0);
 }

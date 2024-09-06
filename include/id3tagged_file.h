@@ -8,8 +8,10 @@
 
 typedef struct s_id3tagged_file
 {
-	t_id3tag	*tag;
 	char		*name;
+	t_id3tag	*tag;
+	char		*rem;
+	int			rem_size;
 	int			fd;
 }	t_id3tagged_file;
 

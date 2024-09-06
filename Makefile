@@ -32,9 +32,13 @@ all: $(NAME)
 $(NAME): $(PRG_FOLDER)/main.o $(id3tagged_file) $(tags) $(frames) $(parsing)
 	$(COMPILER) $(FLAGS) -Iinclude -o $(NAME) $^ -lreadline
 
-bin/clear_padding: $(PRG_FOLDER)/clear_padding.o $(id3tagged_file) $(tags) $(frames)
+clear_padding: $(PRG_FOLDER)/clear_padding.o $(id3tagged_file) $(tags) $(frames)
 	mkdir -p bin
-	$(COMPILER) $(FLAGS) -Iinclude -o $@ $^
+	$(COMPILER) $(FLAGS) -Iinclude -o bin/$@ $^
+
+export_tag: $(PRG_FOLDER)/export_tag.o $(id3tagged_file) $(tags) $(frames)
+	mkdir -p bin
+	$(COMPILER) $(FLAGS) -Iinclude -o bin/$@ $^
 
 clean:
 	@rm -rf $(LIB_FOLDER)/*.o $(PRG_FOLDER)/*.o

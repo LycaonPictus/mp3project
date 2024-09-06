@@ -19,24 +19,11 @@ u_int32_t	get_tag_size(char tag_header[10])
 	} while (++i < 10);
 	return (size);
 }
-#include <stdio.h>
-t_id3tag	*get_tag(int fd)
+
+t_id3tag	*get_tag(int fd, char header[10])
 {
-	int			bytes_read;
-	char		header[10];
 	t_id3tag	*tag;
 
-	bytes_read = read(fd, header, 10);
-	if (bytes_read == -1)
-	{
-		write(2, "Read error.\n", 12);
-		return (NULL);
-	}
-	if (strncmp(header, "ID3", 3))
-	{
-		write(2, "No tag found.\n", 14);
-		return (NULL);
-	}
 	tag = malloc(sizeof(t_id3tag));
 	tag->padding_size = 0;
 	tag->version[0] = header[3];
@@ -83,6 +70,8 @@ int	write_tag(t_id3tag *tag, int fd)
 	u_int32_t		padding;
 	int				bytes_read;
 
+	if (!tag)
+		return (0);
 	write(fd, "ID3", 3);
 	write(fd, tag->version, 2);
 	write(fd, &tag->flags, 1);
