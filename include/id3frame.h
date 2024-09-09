@@ -92,15 +92,8 @@ typedef struct s_id3frame
 	char				*content;
 }	t_id3frame;
 
-typedef struct s_id3framelist
-{
-	t_id3frame				*frame;
-	struct s_id3framelist	*next;
-}	t_id3framelist;
-
-t_id3framelist	*read_frames_v3(int fd, u_int32_t size, u_int32_t *padding);
-void			free_frame(t_id3frame **ptr);
-void			free_framelist(t_id3framelist **ptr);
-int				write_frame(t_id3frame *frame, int fd);
+t_id3frame	*get_frame(int fd, u_int32_t *rem, u_int32_t *padding);
+void		free_frame(t_id3frame **ptr);
+int			write_frame(t_id3frame *frame, int fd);
 
 #endif

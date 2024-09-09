@@ -17,6 +17,7 @@ BIN_FOLDER = bin
 %.o: %.c
 	$(COMPILER) -Iinclude $(FLAGS) -c -o $@ $< -lreadline
 
+framelists = $(LIB_FOLDER)/framelists.o
 frames = $(LIB_FOLDER)/frames.o
 tags = $(LIB_FOLDER)/tags.o
 id3tagged_file = $(LIB_FOLDER)/id3tagged_file.o
@@ -30,14 +31,14 @@ $(tags): $(frames)
 
 all: $(NAME) clear_padding export_tag
 
-$(NAME): $(PRG_FOLDER)/main.o $(id3tagged_file) $(tags) $(frames) $(parsing)
+$(NAME): $(PRG_FOLDER)/main.o $(id3tagged_file) $(tags) $(framelists) $(frames) $(parsing)
 	$(COMPILER) $(FLAGS) -Iinclude -o $(NAME) $^ -lreadline -D BIN_DIR_NAME=$(BIN_FOLDER)
 
-clear_padding: $(PRG_FOLDER)/clear_padding.o $(id3tagged_file) $(tags) $(frames)
+clear_padding: $(PRG_FOLDER)/clear_padding.o $(id3tagged_file) $(tags) $(framelists) $(frames)
 	mkdir -p $(BIN_FOLDER)
 	$(COMPILER) $(FLAGS) -Iinclude -o $(BIN_FOLDER)/$@ $^
 
-export_tag: $(PRG_FOLDER)/export_tag.o $(id3tagged_file) $(tags) $(frames)
+export_tag: $(PRG_FOLDER)/export_tag.o $(id3tagged_file) $(tags) $(framelists) $(frames)
 	mkdir -p $(BIN_FOLDER)
 	$(COMPILER) $(FLAGS) -Iinclude -o $(BIN_FOLDER)/$@ $^
 

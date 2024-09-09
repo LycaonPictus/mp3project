@@ -1,6 +1,8 @@
 #include <id3tag.h>
 
-u_int32_t	get_tag_size(char tag_header[10])
+/* Constructor functions */
+
+static u_int32_t	get_tag_size(char tag_header[10])
 {
 	u_int32_t	size;
 	int			i;
@@ -37,6 +39,8 @@ t_id3tag	*get_tag(int fd, char header[10])
 	return (tag);
 }
 
+/* Destructor functions */
+
 void	free_tag(t_id3tag **ptr)
 {
 	t_id3tag	*tag;
@@ -49,7 +53,9 @@ void	free_tag(t_id3tag **ptr)
 	*ptr = NULL;
 }
 
-void	write_tag_size(t_id3tag *tag, int fd)
+/* Writing functions */
+
+static int	write_tag_size(t_id3tag *tag, int fd)
 {
 	u_int32_t	size;
 	char		buffer[4];
@@ -61,38 +67,62 @@ void	write_tag_size(t_id3tag *tag, int fd)
 		buffer[i] = size % 128;
 		size /= 128;
 	}
-	write (fd, buffer, 4);
+	if (write (fd, buffer, 4) == -1)
+		return (-1);
+	return (4);
+}
+
+static int	write_padding(u_int32_t size, int fd)
+{
+	int	total_bytes;
+	int	bytes_written;
+
+	total_bytes = 0;
+	while (size)
+	{
+		bytes_written = write(fd, "\0", 1);
+		if (bytes_written == -1)
+		{
+			write(2, "Error writing tag padding.\n", 27);
+			return (-1);
+		}
+		size--;
+		total_bytes++;
+	}
+	return (bytes_written);
 }
 
 int	write_tag(t_id3tag *tag, int fd)
 {
-	t_id3framelist	*fl;
-	u_int32_t		padding;
-	int				bytes_read;
+	int	total_bytes;
+	int	bytes_written;
 
 	if (!tag)
 		return (0);
-	write(fd, "ID3", 3);
-	write(fd, tag->version, 2);
-	write(fd, &tag->flags, 1);
-	write_tag_size(tag, fd);
-	fl = tag->frames;
-	while (fl)
-	{
-		bytes_read = write_frame(fl->frame, fd);
-		if (bytes_read == -1)
-			return (1);
-		fl = fl->next;
-	}
-	padding = tag->padding_size;
-	while (padding)
-	{
-		if (write(fd, "\0", 1) == -1)
-		{
-			write(2, "Error writing tag padding.\n", 27);
-			return (1);
-		}
-		padding--;
-	}
-	return (0);
+	total_bytes = 0;
+	bytes_written = write(fd, "ID3", 3);
+	if (bytes_written == -1)
+		return (-1);
+	total_bytes += bytes_written;
+	bytes_written = write(fd, tag->version, 2);
+	if (bytes_written == -1)
+		return (-1);
+	total_bytes += bytes_written;
+	bytes_written = write(fd, &tag->flags, 1);
+	if (bytes_written == -1)
+		return (-1);
+	total_bytes += bytes_written;
+	bytes_written = write_tag_size(tag, fd);
+	if (bytes_written == -1)
+		return (-1);
+	total_bytes += bytes_written;
+	bytes_written = write_frames(tag->frames, fd);
+	if (bytes_written == -1)
+		return (-1);
+	total_bytes += bytes_written;
+	bytes_written = write_padding(tag->padding_size, fd);
+	if (bytes_written == -1)
+		return (-1);
+	total_bytes += bytes_written;
+	return (total_bytes);
 }

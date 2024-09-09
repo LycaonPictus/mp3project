@@ -59,6 +59,7 @@ int	enter_shell(char **env)
 	int		argc;
 	char	**argv;
 
+	write(1, "--Welcome to the Tag Editor --\n", 32);
 	line = NULL;
 	while (1)
 	{

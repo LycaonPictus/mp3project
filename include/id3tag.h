@@ -1,6 +1,6 @@
 #ifndef _ID3TAG_H
 #define _ID3TAG_H
-# include <id3frame.h>
+# include <id3framelist.h>
 
 typedef struct s_id3tag
 {
@@ -13,7 +13,6 @@ typedef struct s_id3tag
 }	t_id3tag;
 
 t_id3tag	*get_tag(int fd, char header[10]);
-u_int32_t	get_tag_size(char tag_header[10]);
 void		free_tag(t_id3tag **ptr);
 int			write_tag(t_id3tag *tag, int fd);
 #endif

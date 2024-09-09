@@ -1,5 +1,7 @@
 #include <id3tagged_file.h>
 
+/* Constructor functions */
+
 t_id3tagged_file	*new_tagged_file(void)
 {
 	t_id3tagged_file	*tf;
@@ -51,6 +53,8 @@ t_id3tagged_file	*get_tagged_file(char *file_name)
 	return (tf);
 }
 
+/* Destructor functions */
+
 void	free_tagged_file(t_id3tagged_file **ptr)
 {
 	t_id3tagged_file *tf;
@@ -66,6 +70,8 @@ void	free_tagged_file(t_id3tagged_file **ptr)
 	free(tf);
 	*ptr = NULL;
 }
+
+/* Writing functions */
 
 int	write_rem(t_id3tagged_file *tf, int fd_out)
 {
