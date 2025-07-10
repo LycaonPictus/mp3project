@@ -56,23 +56,18 @@ static int	write_padding(uint32_t size, int fd)
 
 int	write_tag(t_id3tag *tag, int fd)
 {
-	int	total_bytes;
 	int	bytes_written;
 
 	if (!tag)
 		return (0);
-	total_bytes = 0;
 	bytes_written = write_tag_header(tag->header, fd);
 	if (bytes_written == -1)
-		return (-1);
-	total_bytes += bytes_written;
+		return (1);
 	bytes_written = write_frames(tag->frames, fd);
 	if (bytes_written == -1)
-		return (-1);
-	total_bytes += bytes_written;
+		return (1);
 	bytes_written = write_padding(tag->padding_size, fd);
 	if (bytes_written == -1)
-		return (-1);
-	total_bytes += bytes_written;
-	return (total_bytes);
+		return (1);
+	return (0);
 }

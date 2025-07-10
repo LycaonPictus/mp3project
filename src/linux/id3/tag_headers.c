@@ -8,7 +8,7 @@ static uint32_t	get_tag_size(char tag_header[10])
 
 	size = 0;
 	i = 6;
-	do
+	while (i < 10)
 	{
 		size *= 128;
 		if (tag_header[i] < 0)
@@ -16,8 +16,8 @@ static uint32_t	get_tag_size(char tag_header[10])
 			write(2, "Tag size error.\n", 16);
 			return (0);
 		}
-		size += tag_header[i];
-	} while (++i < 10);
+		size += tag_header[i++];
+	}
 	return (size);
 }
 

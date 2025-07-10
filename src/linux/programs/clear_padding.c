@@ -89,6 +89,7 @@ int	main(int argc, char **argv)
 		system("rm -rf " TEMP_FILE);
 		return (1);
 	}
+	write(1, "OK\n", 3);
 	system("rm -rf " TEMP_FILE);
 	return (0);
 }

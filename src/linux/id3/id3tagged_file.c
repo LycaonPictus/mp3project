@@ -113,5 +113,5 @@ int	write_file(t_id3tagged_file *tf, int fd)
 {
 	if (fd == -1)
 		return (1);
-	return (write_tag(tf->tag, fd) || write_content(tf, fd));
+	return (write_tag(tf->tag, fd) == -1 || write_content(tf, fd));
 }

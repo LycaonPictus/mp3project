@@ -1,58 +1,66 @@
 COMPILER = gcc
-NAME = mp3p
+NAME = id3shell
 FLAGS = -Wall -Wextra -Werror
 INCLUDES = -lreadline -Iinclude
 
 SRC_FOLDER = src/linux
-SRC_FILES = main.c parsing.c
-SRC = $(addprefix $(SRC_FOLDER)/, $(SRC_FILES))
 
-LIB_FOLDER = $(SRC_FOLDER)/lib
-PRG_FOLDER = $(SRC_FOLDER)/programs
+ID3LIB_SRC_FOLDER = $(SRC_FOLDER)/id3
+ID3LIB_SRC_FILES = id3tagged_file.c tags.c tag_headers.c framelists.c frames.c
+ID3LIB_SRC = $(addprefix $(ID3LIB_SRC_FOLDER)/, $(ID3LIB_SRC_FILES))
+
+ID3LIB_OBJ = $(ID3LIB_SRC:.c=.o)
+
+ID3LIB_FOLDER = $(SRC_FOLDER)/lib
+ID3LIB = $(ID3LIB_FOLDER)/id3lib.a
+
+BIN_SRC_FOLDER = $(SRC_FOLDER)/programs
+BIN_SRC_FILES = clear_padding.c id3shell.c export_tag.c
+BIN_SRC = $(addprefix $(BIN_SRC_FOLDER)/, $(BIN_SRC_FILES))
+BIN_OBJ = $(BIN_SRC:.c=.o)
+
+OBJ = $(BIN_OBJ) $(SRC_FOLDER)/parsing.o
 
 BIN_FOLDER = bin
+
+ID3SHELL = $(BIN_FOLDER)/$(NAME)
+
+all: $(ID3SHELL) clear_padding export_tag
 
 # LIB OBJECTS #
 
 %.o: %.c
-	$(COMPILER) -Iinclude $(FLAGS) -c -o $@ $< -lreadline
+	@$(COMPILER) -Iinclude $(FLAGS) -c -o $@ $< -lreadline
 
-framelists = $(LIB_FOLDER)/framelists.o
-frames = $(LIB_FOLDER)/frames.o
-tag_headers = $(LIB_FOLDER)/tag_headers.o
-tags = $(LIB_FOLDER)/tags.o
-id3tagged_file = $(LIB_FOLDER)/id3tagged_file.o
-parsing = $(LIB_FOLDER)/parsing.o
-
-$(id3tagged_file): $(tags)
-
-$(tags): $(frames) $(tag_headers)
+$(ID3LIB): $(ID3LIB_OBJ)
+	@mkdir -p $(ID3LIB_FOLDER)
+	@ar rcs $@ $^
+	@rm $(ID3LIB_OBJ)
 
 # BINARY FILES #
 
-all: $(NAME) clear_padding export_tag
+$(ID3SHELL): $(BIN_SRC_FOLDER)/id3shell.o $(ID3LIB) $(SRC_FOLDER)/parsing.o
+	@mkdir -p $(BIN_FOLDER)
+	@$(COMPILER) $(FLAGS) -Iinclude -o $(ID3SHELL) $^ -lreadline -D BIN_DIR_NAME=$(BIN_FOLDER)
 
-$(NAME): $(PRG_FOLDER)/main.o $(id3tagged_file) $(tags) $(tag_headers) $(framelists) $(frames) $(parsing)
-	$(COMPILER) $(FLAGS) -Iinclude -o $(NAME) $^ -lreadline -D BIN_DIR_NAME=$(BIN_FOLDER)
+clear_padding: $(BIN_SRC_FOLDER)/clear_padding.o $(ID3LIB)
+	@mkdir -p $(BIN_FOLDER)
+	@$(COMPILER) $(FLAGS) -Iinclude -o $(BIN_FOLDER)/$@ $^
 
-clear_padding: $(PRG_FOLDER)/clear_padding.o $(id3tagged_file) $(tags) $(tag_headers) $(framelists) $(frames)
-	mkdir -p $(BIN_FOLDER)
-	$(COMPILER) $(FLAGS) -Iinclude -o $(BIN_FOLDER)/$@ $^
-
-export_tag: $(PRG_FOLDER)/export_tag.o $(id3tagged_file) $(tags) $(tag_headers) $(framelists) $(frames)
-	mkdir -p $(BIN_FOLDER)
-	$(COMPILER) $(FLAGS) -Iinclude -o $(BIN_FOLDER)/$@ $^
+export_tag: $(BIN_SRC_FOLDER)/export_tag.o $(ID3LIB)
+	@mkdir -p $(BIN_FOLDER)
+	@$(COMPILER) $(FLAGS) -Iinclude -o $(BIN_FOLDER)/$@ $^
 
 clean:
-	@rm -rf $(LIB_FOLDER)/*.o $(PRG_FOLDER)/*.o
+	@rm -rf $(OBJ)
+	@rm -rf $(ID3LIB_FOLDER)
 
 fclean: clean
-	@rm -rf $(NAME)
 	@rm -rf $(BIN_FOLDER)
 
 re: fclean all
 
-leaks: $(NAME)
-	@valgrind --leak-check=full --show-leak-kinds=all ./$(NAME) 2> shell_leaks.txt
+leaks: $(ID3SHELL)
+	@valgrind --leak-check=full --show-leak-kinds=all ./$(ID3SHELL) 2> shell_leaks.txt
 
 .PHONY: all clean fclean re
