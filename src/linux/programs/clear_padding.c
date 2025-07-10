@@ -21,7 +21,7 @@ static int	temp_writing(char *input)
 	}
 	if (file->tag)
 	{
-		file->tag->size -= file->tag->padding_size;
+		file->tag->header.size -= file->tag->padding_size;
 		file->tag->padding_size = 0;
 	}
 	result = write_file(file, temp_fd);

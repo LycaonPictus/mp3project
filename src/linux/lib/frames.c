@@ -23,9 +23,9 @@ static int	is_padding(char *buffer, int bytes_read)
 	return (1);
 }
 
-static u_int32_t	get_frame_size(char array[4])
+static uint32_t	get_frame_size(char array[4])
 {
-	u_int32_t	size;
+	uint32_t	size;
 	int	i;
 
 	size = 0;
@@ -37,7 +37,7 @@ static u_int32_t	get_frame_size(char array[4])
 	return (size);
 }
 
-static void	encode_frame_size(u_int32_t size, char array[4])
+static void	encode_frame_size(uint32_t size, char array[4])
 {
 	int			i;
 
@@ -66,7 +66,7 @@ static t_id3frame	*new_frame(void)
 	return (frame);
 }
 
-t_id3frame	*get_frame(int fd, u_int32_t *rem, u_int32_t *padding)
+t_id3frame	*get_frame(int fd, uint32_t *rem, uint32_t *padding)
 {
 	int			bytes_read;
 	t_id3frame	*frame;

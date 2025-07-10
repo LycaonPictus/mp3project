@@ -1,9 +1,11 @@
 #ifndef _ID3FRAME_H
 #define _ID3FRAME_H
+
 # include <stdlib.h>
 # include <ctype.h>
 # include <unistd.h>
 # include <string.h>
+# include <stdint.h>
 
 typedef enum e_frameID
 {
@@ -87,12 +89,12 @@ typedef enum e_frameID
 typedef struct s_id3frame
 {
 	char				frameID[4];
-	u_int32_t			size;
-	u_char				flags[2];
+	uint32_t			size;
+	uint8_t				flags[2];
 	char				*content;
 }	t_id3frame;
 
-t_id3frame	*get_frame(int fd, u_int32_t *rem, u_int32_t *padding);
+t_id3frame	*get_frame(int fd, uint32_t *rem, uint32_t *padding);
 void		free_frame(t_id3frame **ptr);
 int			write_frame(t_id3frame *frame, int fd);
 

@@ -19,26 +19,27 @@ BIN_FOLDER = bin
 
 framelists = $(LIB_FOLDER)/framelists.o
 frames = $(LIB_FOLDER)/frames.o
+tag_headers = $(LIB_FOLDER)/tag_headers.o
 tags = $(LIB_FOLDER)/tags.o
 id3tagged_file = $(LIB_FOLDER)/id3tagged_file.o
 parsing = $(LIB_FOLDER)/parsing.o
 
 $(id3tagged_file): $(tags)
 
-$(tags): $(frames)
+$(tags): $(frames) $(tag_headers)
 
 # BINARY FILES #
 
 all: $(NAME) clear_padding export_tag
 
-$(NAME): $(PRG_FOLDER)/main.o $(id3tagged_file) $(tags) $(framelists) $(frames) $(parsing)
+$(NAME): $(PRG_FOLDER)/main.o $(id3tagged_file) $(tags) $(tag_headers) $(framelists) $(frames) $(parsing)
 	$(COMPILER) $(FLAGS) -Iinclude -o $(NAME) $^ -lreadline -D BIN_DIR_NAME=$(BIN_FOLDER)
 
-clear_padding: $(PRG_FOLDER)/clear_padding.o $(id3tagged_file) $(tags) $(framelists) $(frames)
+clear_padding: $(PRG_FOLDER)/clear_padding.o $(id3tagged_file) $(tags) $(tag_headers) $(framelists) $(frames)
 	mkdir -p $(BIN_FOLDER)
 	$(COMPILER) $(FLAGS) -Iinclude -o $(BIN_FOLDER)/$@ $^
 
-export_tag: $(PRG_FOLDER)/export_tag.o $(id3tagged_file) $(tags) $(framelists) $(frames)
+export_tag: $(PRG_FOLDER)/export_tag.o $(id3tagged_file) $(tags) $(tag_headers) $(framelists) $(frames)
 	mkdir -p $(BIN_FOLDER)
 	$(COMPILER) $(FLAGS) -Iinclude -o $(BIN_FOLDER)/$@ $^
 

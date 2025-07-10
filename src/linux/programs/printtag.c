@@ -53,7 +53,7 @@ static int	read_header(int fd_mp3, char header[10])
 	return (0);
 }
 
-static int	read_body(int fd_mp3, char **body, u_int32_t size)
+static int	read_body(int fd_mp3, char **body, uint32_t size)
 {
 	int			bytes_read;
 
@@ -71,7 +71,7 @@ void	write_tag(int fd_in, int fd_out)
 {
 	char		header[10];
 	char		*body;
-	u_int32_t	size;
+	uint32_t	size;
 
 	read_header(fd_in, header);
 	size = get_tag_size(header);

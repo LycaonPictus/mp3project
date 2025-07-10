@@ -12,8 +12,8 @@ t_id3tagged_file	*new_tagged_file(void)
 		write(2, "get_tagged_file: No memory available\n", 37);
 		return (NULL);
 	}
-	tf->rem = NULL;
-	tf->rem_size = 0;
+	tf->content = NULL;
+	tf->content_size = 0;
 	tf->tag = NULL;
 	return (tf);
 }
@@ -43,9 +43,9 @@ t_id3tagged_file	*get_tagged_file(char *file_name)
 		write(2, "Read error.\n", 12);
 	else if (bytes_read < 10 || strncmp(buffer, "ID3", 3))
 	{
-		tf->rem = malloc(bytes_read);
-		memcpy(tf->rem, buffer, bytes_read);
-		tf->rem_size = bytes_read;
+		tf->content = malloc(bytes_read);
+		memcpy(tf->content, buffer, bytes_read);
+		tf->content_size = bytes_read;
 		write(2, "No tag found.\n", 14);
 	}
 	else
@@ -66,14 +66,14 @@ void	free_tagged_file(t_id3tagged_file **ptr)
 	free(tf->name);
 	tf->name = NULL;
 	close(tf->fd);
-	free(tf->rem);
+	free(tf->content);
 	free(tf);
 	*ptr = NULL;
 }
 
 /* Writing functions */
 
-int	write_rem(t_id3tagged_file *tf, int fd_out)
+int	write_content(t_id3tagged_file *tf, int fd_out)
 {
 	int		bytes_written;
 	int		bytes_read;
@@ -81,9 +81,9 @@ int	write_rem(t_id3tagged_file *tf, int fd_out)
 
 	if (!tf)
 		return (1);
-	if (tf->rem)
+	if (tf->content)
 	{
-		bytes_written = write(fd_out, tf->rem, tf->rem_size);
+		bytes_written = write(fd_out, tf->content, tf->content_size);
 		if (bytes_written == -1)
 		{
 			write(2, "Error writing the content.\n", 27);
@@ -113,5 +113,5 @@ int	write_file(t_id3tagged_file *tf, int fd)
 {
 	if (fd == -1)
 		return (1);
-	return (write_tag(tf->tag, fd) || write_rem(tf, fd));
+	return (write_tag(tf->tag, fd) || write_content(tf, fd));
 }

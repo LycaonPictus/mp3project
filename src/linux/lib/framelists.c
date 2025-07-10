@@ -1,6 +1,6 @@
 #include <id3framelist.h>
 
-t_id3framelist	*read_frames_v3(int fd, u_int32_t size, u_int32_t *padding)
+t_id3framelist	*read_frames_v3(int fd, uint32_t size, uint32_t *padding)
 {
 	t_id3frame		*frame;
 	t_id3framelist	*list;
