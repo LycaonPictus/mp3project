@@ -1,4 +1,5 @@
 #include <id3tagged_file.h>
+#include <stdlib.h>
 
 /* Constructor functions */
 

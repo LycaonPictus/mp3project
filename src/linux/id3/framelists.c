@@ -1,4 +1,6 @@
 #include <id3framelist.h>
+#include <stdlib.h>
+#include <string.h>
 
 t_id3framelist	*read_frames_v3(int fd, uint32_t size, uint32_t *padding)
 {
@@ -38,7 +40,7 @@ t_id3framelist	*read_frames_v3(int fd, uint32_t size, uint32_t *padding)
 	return (list);
 }
 
-void	del_frame(t_id3framelist **ptr, unsigned int index)
+void	del_frame_by_index(t_id3framelist **ptr, unsigned int index)
 {
 	t_id3framelist	*node;
 	unsigned int	cur_index;
@@ -63,6 +65,36 @@ void	del_frame(t_id3framelist **ptr, unsigned int index)
 	free(node);
 }
 
+void	del_frame_by_id(t_id3framelist **ptr, char id[4])
+{
+	t_id3framelist	*node;
+	t_id3framelist	*prev;
+
+	prev = NULL;
+	node = *ptr;
+	while (node)
+	{
+		if (!strncmp(id, node->frame->header.frameID, 4))
+		{
+			if (prev)
+				prev->next = node->next;
+			else
+				*ptr = node->next;
+			free_frame(&node->frame);
+			free(node);
+			if (prev)
+				node = prev->next;
+			else
+				node = *ptr;
+		}
+		else
+		{
+			prev = node;
+			node = node->next;
+		}
+	}
+}
+
 void	free_framelist(t_id3framelist **ptr)
 {
 	t_id3framelist *node;
@@ -81,16 +113,15 @@ void	free_framelist(t_id3framelist **ptr)
 int	write_frames(t_id3framelist *list, int fd)
 {
 	int	bytes_written;
-	int	total_bytes;
 
-	total_bytes = 0;
+	if (!list)
+		return (1);
 	while (list)
 	{
 		bytes_written = write_frame(list->frame, fd);
 		if (bytes_written == -1)
-			return (-1);
-		total_bytes += bytes_written;
+			return (1);
 		list = list->next;
 	}
-	return (total_bytes);
+	return (0);
 }

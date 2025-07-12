@@ -22,8 +22,8 @@ static int	temp_writing(char *input)
 	}
 	if (file->tag)
 	{
-		file->tag->header.size -= file->tag->padding_size;
-		file->tag->padding_size = 0;
+		/*  */
+		del_frame_by_id(&file->tag->frames, "PRIV");
 	}
 	result = write_file(file, temp_fd);
 	free_tagged_file(&file);

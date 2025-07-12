@@ -1,4 +1,6 @@
 #include <id3tag.h>
+#include <stdlib.h>
+#include <unistd.h>
 
 /* Constructor functions */
 
@@ -36,38 +38,44 @@ void	free_tag(t_id3tag **ptr)
 
 static int	write_padding(uint32_t size, int fd)
 {
-	int	total_bytes;
 	int	bytes_written;
 
-	total_bytes = 0;
 	while (size)
 	{
 		bytes_written = write(fd, "\0", 1);
 		if (bytes_written == -1)
 		{
 			write(2, "Error writing tag padding.\n", 27);
-			return (-1);
+			return (1);
 		}
 		size--;
-		total_bytes++;
 	}
-	return (bytes_written);
+	return (0);
+}
+
+static void	calculate_tag_size(t_id3tag *tag)
+{
+	t_id3framelist	*frame_node;
+	uint32_t		size;
+
+	size = 0;
+	frame_node = tag->frames;
+	while (frame_node)
+	{
+		if (frame_node->frame)
+			size += 10 + frame_node->frame->header.size;
+		frame_node = frame_node->next;
+	}
+	size += tag->padding_size;
+	tag->header.size = size;
 }
 
 int	write_tag(t_id3tag *tag, int fd)
 {
-	int	bytes_written;
-
 	if (!tag)
 		return (0);
-	bytes_written = write_tag_header(tag->header, fd);
-	if (bytes_written == -1)
-		return (1);
-	bytes_written = write_frames(tag->frames, fd);
-	if (bytes_written == -1)
-		return (1);
-	bytes_written = write_padding(tag->padding_size, fd);
-	if (bytes_written == -1)
-		return (1);
-	return (0);
+	calculate_tag_size(tag);
+	return (write_tag_header(tag->header, fd)
+			|| write_frames(tag->frames, fd)
+			|| write_padding(tag->padding_size, fd));
 }

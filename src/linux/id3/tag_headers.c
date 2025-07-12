@@ -45,30 +45,24 @@ static int	write_tag_size(t_id3tag_header header, int fd)
 		size /= 128;
 	}
 	if (write (fd, buffer, 4) == -1)
-		return (-1);
-	return (4);
+		return (1);
+	return (0);
 }
 
 int	write_tag_header(t_id3tag_header header, int fd)
 {
-	int	total_bytes;
 	int	bytes_written;
 
-	total_bytes = 0;
 	bytes_written = write(fd, "ID3", 3);
 	if (bytes_written == -1)
-		return (-1);
-	total_bytes += bytes_written;
+		return (1);
 	bytes_written = write(fd, header.version, 2);
 	if (bytes_written == -1)
-		return (-1);
-	total_bytes += bytes_written;
+		return (1);
 	bytes_written = write(fd, &header.flags, 1);
 	if (bytes_written == -1)
-		return (-1);
-	total_bytes += bytes_written;
-	bytes_written = write_tag_size(header, fd);
-	if (bytes_written == -1)
-		return (-1);
-	return (total_bytes);
+		return (1);
+	if (write_tag_size(header, fd))
+		return (1);
+	return (0);
 }
