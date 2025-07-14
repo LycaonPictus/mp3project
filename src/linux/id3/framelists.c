@@ -95,6 +95,29 @@ void	del_frame_by_id(t_id3framelist **ptr, char id[4])
 	}
 }
 
+void	add_frame_last(t_id3framelist **ptr, t_id3frame *frame)
+{
+	t_id3framelist	*node;
+	t_id3framelist	*new_node;
+
+	if (!frame)
+		return ;
+	new_node = malloc(sizeof(t_id3framelist));
+	if (!new_node)
+		return ;
+	new_node->frame = frame;
+	new_node->next = NULL;
+	if (!*ptr)
+	{
+		*ptr = new_node;
+		return ;
+	}
+	node = *ptr;
+	while (node->next)
+		node = node->next;
+	node->next = new_node;
+}
+
 void	free_framelist(t_id3framelist **ptr)
 {
 	t_id3framelist *node;
@@ -107,6 +130,7 @@ void	free_framelist(t_id3framelist **ptr)
 		free_frame(&node->frame);
 		free(node);
 		node = next;
+		*ptr = node;
 	}
 }
 

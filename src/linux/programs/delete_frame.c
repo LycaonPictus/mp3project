@@ -2,8 +2,9 @@
 #define TEMP_FILE ".temp"
 #include <sys/wait.h>
 #include <stdlib.h>
+#include <ctype.h>
 
-static int	temp_writing(char *input)
+static int	temp_writing(char *input, char *tag_id)
 {
 	int					temp_fd;
 	t_id3tagged_file	*file;
@@ -13,7 +14,7 @@ static int	temp_writing(char *input)
 	file = get_tagged_file(input);
 	if (!file)
 		return (1);
-	temp_fd = open (TEMP_FILE, O_WRONLY | O_CREAT | O_TRUNC, 0666);
+	temp_fd = open(TEMP_FILE, O_WRONLY | O_CREAT | O_TRUNC, 0666);
 	if (temp_fd == -1)
 	{
 		write(2, "Error opening temp file.\n", 26);
@@ -21,10 +22,7 @@ static int	temp_writing(char *input)
 		return (1);
 	}
 	if (file->tag)
-	{
-		/*  */
-		del_frame_by_id(&file->tag->frames, "PRIV");
-	}
+		del_frame_by_id(&file->tag->frames, tag_id);
 	result = write_file(file, temp_fd);
 	free_tagged_file(&file);
 	close(temp_fd);
@@ -70,22 +68,38 @@ static int	copy_to_outfile(char *output)
 	return (result);
 }
 
+static int	validate_id(char *id)
+{
+	size_t	size;
+
+	size = 0;
+	while (id[size])
+	{
+		if (!isalnum(id[size]))
+			return (1);
+		if (size == 4)
+			return (1);
+		size++;
+	}
+	return (0);
+}
+
 int	main(int argc, char **argv)
 {
 	char	*out;
 
-	if (argc < 2 || argc > 3)
+	if (argc < 3 || argc > 4 || validate_id(argv[2]))
 	{
 		write(2, "usage: " , 8);
 		write(2, argv[0], strlen(argv[0]));
-		write(2, " input_file [output_file].\n", 28);
+		write(2, " input_file tag_id [output_file].\n", 34);
 		return (1);
 	}
-	if (argc == 3)
-		out = argv[2];
+	if (argc == 4)
+		out = argv[3];
 	else
-		out = argv[1];
-	if (temp_writing(argv[1]) || copy_to_outfile(out))
+		out = argv[1];	
+	if (temp_writing(argv[1], argv[2]) || copy_to_outfile(out))
 	{
 		system("rm -rf " TEMP_FILE);
 		return (1);

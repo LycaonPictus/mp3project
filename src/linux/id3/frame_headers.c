@@ -127,7 +127,7 @@ t_id3frame_header	get_frame_header(char buffer[10])
 int	write_frame_header(t_id3frame_header header, int fd)
 {
 	int		bytes_written;
-	char	buffer[10];
+	char	buffer[10] = {0};
 
 	memcpy(buffer, header.frameID, 4);
 	encode_frame_size(header.size, &buffer[4]);

@@ -1,4 +1,6 @@
 #include <id3tag.h>
+#include <stdlib.h>
+#include <unistd.h>
 
 static int	check_errors(int argc, char **argv)
 {

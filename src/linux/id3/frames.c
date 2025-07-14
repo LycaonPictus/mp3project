@@ -60,7 +60,27 @@ static int	no_more_frames(int fd, uint32_t *rem, uint32_t *padding, char * heade
 	}
 	return (0);
 }
-#include <stdio.h>
+
+t_id3frame	*new_frame(char id[4], char *content, uint32_t size)
+{
+	t_id3frame	*frame;
+
+	if (!is_frame_id(id))
+		return (NULL);
+	frame = malloc(sizeof(t_id3frame));
+	if (!frame)
+		return (NULL);
+	strncpy(frame->header.frameID, id, 4);
+	frame->content = content;
+	if (!content)
+		frame->header.size = 0;
+	else
+		frame->header.size = size;
+	frame->header.flags[0] = 0;
+	frame->header.flags[1] = 0;
+	return (frame);
+}
+
 t_id3frame	*get_frame(int fd, uint32_t *rem, uint32_t *padding)
 {
 	t_id3frame	*frame;
@@ -94,28 +114,6 @@ t_id3frame	*get_frame(int fd, uint32_t *rem, uint32_t *padding)
 		free_frame(&frame);
 		return (NULL);
 	}
-
-	printf("%c%c%c%c (%i):\n", frame->header.frameID[0], frame->header.frameID[1], frame->header.frameID[2], frame->header.frameID[3], frame->header.id_int);
-	if (frame->header.frameID[0] == 'T')
-	switch (frame->content[0])
-	{
-		case 0:
-			printf("(ISO-8859-1)");
-			break;
-		case 1:
-			printf("(UTF-16 con BOM)");
-			break;
-		case 2:
-			printf("(UTF-16BE sin BOM)");
-			break;
-		default:
-			printf("(??\?)");
-	}
-	if (frame->header.size < 300)
-	for (uint32_t i = 0; i < frame->header.size; i++)
-		printf("%c", frame->content[i]);
-	printf("\n");
-
 	return (frame);
 }
 
@@ -155,4 +153,11 @@ void	set_content(t_id3frame *frame, char *content, uint32_t size)
 	free(frame->content);
 	frame->content = content;
 	frame->header.size = size;
+}
+
+int	has_tag_id(t_id3frame *frame, char *id)
+{
+	if (!strncmp(frame->header.frameID, id, 4))
+		return (1);
+	return (0);
 }

@@ -15,5 +15,6 @@ void			free_framelist(t_id3framelist **ptr);
 int				write_frames(t_id3framelist *list, int fd);
 void			del_frame_by_index(t_id3framelist **ptr, unsigned int index);
 void			del_frame_by_id(t_id3framelist **ptr, char id[4]);
+void			add_frame_last(t_id3framelist **ptr, t_id3frame *frame);
 
 #endif
