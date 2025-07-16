@@ -11,7 +11,7 @@ t_id3framelist	*read_frames_v3(int fd, uint32_t size, uint32_t *padding)
 
 	list = NULL;
 	last = NULL;
-	do
+	do // At least once to get the padding data
 	{
 		frame = get_frame(fd, &size, padding);
 		if (!frame)
@@ -21,7 +21,7 @@ t_id3framelist	*read_frames_v3(int fd, uint32_t size, uint32_t *padding)
 		if (!new)
 		{
 			free_frame(&frame);
-			free_framelist(&list);
+			free_framelist(&list, 1);
 			return (NULL);
 		}
 		new->frame = frame;
@@ -95,30 +95,46 @@ void	del_frame_by_id(t_id3framelist **ptr, char id[4])
 	}
 }
 
-void	add_frame_last(t_id3framelist **ptr, t_id3frame *frame)
+int	add_frame_last(t_id3framelist **ptr, t_id3frame *frame)
 {
 	t_id3framelist	*node;
 	t_id3framelist	*new_node;
 
 	if (!frame)
-		return ;
+		return (1);
 	new_node = malloc(sizeof(t_id3framelist));
 	if (!new_node)
-		return ;
+		return (1);
 	new_node->frame = frame;
 	new_node->next = NULL;
 	if (!*ptr)
 	{
 		*ptr = new_node;
-		return ;
+		return (0);
 	}
 	node = *ptr;
 	while (node->next)
 		node = node->next;
 	node->next = new_node;
+	return (0);
 }
 
-void	free_framelist(t_id3framelist **ptr)
+t_id3framelist	*filter_by_id(t_id3framelist *list, char id[4])
+{
+	t_id3framelist	*out;
+
+	out = NULL;
+	while (list)
+	{
+		if (has_tag_id(list->frame, id))
+			if (add_frame_last(&out, list->frame))
+				free_framelist(&out, 0);
+		list = list->next;
+	}
+	return (out);
+}
+
+void	free_framelist(t_id3framelist **ptr, int delete_frames)
 {
 	t_id3framelist *node;
 	t_id3framelist *next;
@@ -127,7 +143,8 @@ void	free_framelist(t_id3framelist **ptr)
 	while (node)
 	{
 		next = node->next;
-		free_frame(&node->frame);
+		if (delete_frames)
+			free_frame(&node->frame);
 		free(node);
 		node = next;
 		*ptr = node;

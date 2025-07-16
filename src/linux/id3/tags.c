@@ -29,7 +29,7 @@ void	free_tag(t_id3tag **ptr)
 	tag = *ptr;
 	if (!tag)
 		return ;
-	free_framelist(&tag->frames);
+	free_framelist(&tag->frames, 1);
 	free(tag);
 	*ptr = NULL;
 }
