@@ -11,7 +11,7 @@ ID3LIB_SRC = $(addprefix $(ID3LIB_SRC_FOLDER)/, $(ID3LIB_SRC_FILES))
 
 ID3LIB_OBJ = $(ID3LIB_SRC:.c=.o)
 
-ID3LIB_FOLDER = lib
+ID3LIB_FOLDER = lib/id3lib
 ID3LIB = $(ID3LIB_FOLDER)/id3lib.a
 
 BIN_SRC_FOLDER = $(SRC_FOLDER)/programs
@@ -19,7 +19,7 @@ BIN_SRC_FILES = clear_padding.c delete_frame.c id3shell.c export_tag.c print_tag
 BIN_SRC = $(addprefix $(BIN_SRC_FOLDER)/, $(BIN_SRC_FILES))
 BIN_OBJ = $(BIN_SRC:.c=.o)
 
-OBJ = $(BIN_OBJ) $(SRC_FOLDER)/parsing.o
+OBJ = $(BIN_OBJ) $(SRC_FOLDER)/parsing.o $(SRC_FOLDER)/utils/album_pics.o $(SRC_FOLDER)/utils/lyrics.o
 
 BIN_FOLDER = bin
 
