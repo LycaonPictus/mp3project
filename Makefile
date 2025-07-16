@@ -1,17 +1,17 @@
 COMPILER = gcc
 NAME = id3shell
 FLAGS = -Wall -Wextra -Werror
-INCLUDES = -lreadline -Iinclude
+INCLUDES = -lreadline -Iinclude -Iinclude/id3lib
 
 SRC_FOLDER = src/linux
 
-ID3LIB_SRC_FOLDER = $(SRC_FOLDER)/id3
-ID3LIB_SRC_FILES = id3tagged_file.c tags.c tag_headers.c framelists.c frames.c frame_headers.c
+ID3LIB_SRC_FOLDER = $(SRC_FOLDER)/id3lib
+ID3LIB_SRC_FILES = id3tagged_file.c tags.c tag_headers.c framelists.c frames.c frame_headers.c frame_content.c
 ID3LIB_SRC = $(addprefix $(ID3LIB_SRC_FOLDER)/, $(ID3LIB_SRC_FILES))
 
 ID3LIB_OBJ = $(ID3LIB_SRC:.c=.o)
 
-ID3LIB_FOLDER = $(SRC_FOLDER)/lib
+ID3LIB_FOLDER = lib
 ID3LIB = $(ID3LIB_FOLDER)/id3lib.a
 
 BIN_SRC_FOLDER = $(SRC_FOLDER)/programs
@@ -30,7 +30,7 @@ all: $(ID3SHELL) clear_padding delete_frame export_tag print_tag
 # LIB OBJECTS #
 
 %.o: %.c
-	@$(COMPILER) -Iinclude $(FLAGS) -c -o $@ $< -lreadline
+	@$(COMPILER) -Iinclude -Iinclude/id3lib $(FLAGS) -c -o $@ $< -lreadline
 
 $(ID3LIB): $(ID3LIB_OBJ)
 	@mkdir -p $(ID3LIB_FOLDER)
@@ -45,17 +45,17 @@ $(ID3SHELL): $(BIN_SRC_FOLDER)/id3shell.o $(ID3LIB) $(SRC_FOLDER)/parsing.o
 
 clear_padding: $(BIN_SRC_FOLDER)/clear_padding.o $(ID3LIB)
 	@mkdir -p $(BIN_FOLDER)
-	@$(COMPILER) $(FLAGS) -Iinclude -o $(BIN_FOLDER)/$@ $^
+	@$(COMPILER) $(FLAGS) -Iinclude/id3lib -o $(BIN_FOLDER)/$@ $^
 
 export_tag: $(BIN_SRC_FOLDER)/export_tag.o $(ID3LIB)
 	@mkdir -p $(BIN_FOLDER)
-	@$(COMPILER) $(FLAGS) -Iinclude -o $(BIN_FOLDER)/$@ $^
+	@$(COMPILER) $(FLAGS) -Iinclude/id3lib -o $(BIN_FOLDER)/$@ $^
 
 print_tag: $(BIN_SRC_FOLDER)/print_tag.o $(ID3LIB)
-	@$(COMPILER) $(FLAGS) -Iinclude -o $(BIN_FOLDER)/$@ $^
+	@$(COMPILER) $(FLAGS) -Iinclude/id3lib -o $(BIN_FOLDER)/$@ $^
 
 delete_frame: $(BIN_SRC_FOLDER)/delete_frame.o $(ID3LIB)
-	@$(COMPILER) $(FLAGS) -Iinclude -o $(BIN_FOLDER)/$@ $^
+	@$(COMPILER) $(FLAGS) -Iinclude/id3lib -o $(BIN_FOLDER)/$@ $^
 
 clean:
 	@rm -rf $(OBJ)
