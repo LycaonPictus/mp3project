@@ -155,7 +155,7 @@ void	set_content(t_id3frame *frame, char *content, uint32_t size)
 	frame->header.size = size;
 }
 
-int	has_tag_id(t_id3frame *frame, char *id)
+int	has_tag_id(t_id3frame const *frame, char const *id)
 {
 	if (!strncmp(frame->header.frameID, id, 4))
 		return (1);

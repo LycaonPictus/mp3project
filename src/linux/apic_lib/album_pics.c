@@ -4,16 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <id3frame_content.h>
-
-typedef struct s_album_pic
-{
-	char		text_encoding;
-	char		*mime_type;
-	char		picture_type;
-	char		*description;
-	char		*binary_data;
-	uint32_t	data_size;
-}	t_album_pic;
+#include <apic.h>
 
 void	free_album_pic(t_album_pic **ptr)
 {
@@ -107,20 +98,3 @@ int	export_album_picture(t_id3tag *tag, char *filename)
 	close(file_fd);
 	return (0);
 }
-/* 
-#include <id3tagged_file.h>
-#include <stdio.h>
-int main()
-{
-	t_id3tagged_file	*file;
-	char				*filename = "example/Ed Sheeran - Thinking out loud.mp3";
-
-	file = get_tagged_file(filename);
-	if (!file)
-		return (1);
-	if (export_album_picture(file->tag, "test.jpg"))
-		return (1);
-	free_tagged_file(&file);
-	return (0);
-}
- */

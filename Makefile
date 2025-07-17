@@ -14,7 +14,7 @@ OBJ = $(BIN_OBJ) $(ID3LIB_OBJ) $(SRC_FOLDER)/parsing.o $(SRC_FOLDER)/utils/album
 all: $(ID3SHELL) clear_padding delete_frame export_tag print_tag
 
 %.o: %.c
-	@$(COMPILER) -Iinclude -Iinclude/id3lib $(FLAGS) -c -o $@ $< -lreadline
+	@$(COMPILER) -Iinclude -Iinclude/id3lib -Iinclude/apiclib $(FLAGS) -c -o $@ $< -lreadline
 
 clean:
 	@rm -rf $(OBJ)
@@ -64,6 +64,9 @@ print_tag: $(BIN_SRC_FOLDER)/print_tag.o $(ID3LIB)
 
 delete_frame: $(BIN_SRC_FOLDER)/delete_frame.o $(ID3LIB)
 	@$(COMPILER) $(FLAGS) -Iinclude/id3lib -o $(BIN_FOLDER)/$@ $^
+
+export_picture: $(BIN_SRC_FOLDER)/export_picture.o $(ID3LIB) src/linux/apic_lib/album_pics.o
+	@$(COMPILER) $(FLAGS) -Iinclude/id3lib -Iinclude/apiclib -o $(BIN_FOLDER)/$@ $^
 
 #  #
 leaks: $(ID3SHELL)
