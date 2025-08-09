@@ -10,6 +10,4 @@ typedef struct s_text_content
 	uint32_t	size;
 }	t_text_content;
 
-
-
 #endif

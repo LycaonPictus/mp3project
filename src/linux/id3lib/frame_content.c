@@ -53,7 +53,7 @@ static char	*to_utf_16(char *string, uint32_t *size)
 	while (string[i])
 	{
 		if (string[i++] & 0x8)
-			continue;
+			continue ;
 		n_chars++;
 	}
 	*size = 2 * (n_chars + 1);
